@@ -1,0 +1,66 @@
+2025-10-23T21:26:28.702-03:00  INFO 15328 --- [restartedMain] com.belleza.pos.PosApiApplication        : Starting PosApiApplication using Java 21.0.5 with PID 15328 (C:\Proyectos\POS_beauty\beauty_pos_api_rest\target\classes started by crist in C:\Proyectos\POS_beauty\beauty_pos_api_rest)
+2025-10-23T21:26:28.703-03:00 DEBUG 15328 --- [restartedMain] com.belleza.pos.PosApiApplication        : Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-10-23T21:26:28.704-03:00  INFO 15328 --- [restartedMain] com.belleza.pos.PosApiApplication        : No active profile set, falling back to 1 default profile: "default"
+2025-10-23T21:26:28.733-03:00  INFO 15328 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-10-23T21:26:28.733-03:00  INFO 15328 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-10-23T21:26:29.276-03:00  INFO 15328 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-23T21:26:29.283-03:00  INFO 15328 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 JPA repository interfaces.
+2025-10-23T21:26:29.855-03:00  INFO 15328 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-10-23T21:26:29.855-03:00  INFO 15328 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-10-23T21:26:29.855-03:00  INFO 15328 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-10-23T21:26:29.918-03:00  INFO 15328 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/api]    : Initializing Spring embedded WebApplicationContext
+2025-10-23T21:26:29.918-03:00  INFO 15328 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1185 ms
+2025-10-23T21:26:29.934-03:00 ERROR 15328 --- [restartedMain] o.s.b.web.embedded.tomcat.TomcatStarter  : Error starting Tomcat context. Exception: org.springframework.beans.factory.UnsatisfiedDependencyException. Message: Error creating bean with name 'jwtAuthenticationFilter' defined in file [C:\Proyectos\POS_beauty\beauty_pos_api_rest\target\classes\com\belleza\pos\security\jwt\JwtAuthenticationFilter.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'org.springframework.security.core.userdetails.UserDetailsService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-10-23T21:26:29.951-03:00  INFO 15328 --- [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2025-10-23T21:26:29.958-03:00  WARN 15328 --- [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Unable to start web server
+2025-10-23T21:26:29.964-03:00  INFO 15328 --- [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-10-23T21:26:29.978-03:00 ERROR 15328 --- [restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.belleza.pos.security.jwt.JwtAuthenticationFilter required a bean of type 'org.springframework.security.core.userdetails.UserDetailsService' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'org.springframework.security.core.userdetails.UserDetailsService' in your configuration.
+
+2025-10-23T21:44:12.404-03:00  INFO 13768 --- [restartedMain] com.belleza.pos.PosApiApplication        : Starting PosApiApplication using Java 21.0.5 with PID 13768 (C:\Proyectos\POS_beauty\beauty_pos_api_rest\target\classes started by crist in C:\Proyectos\POS_beauty\beauty_pos_api_rest)
+2025-10-23T21:44:12.405-03:00 DEBUG 13768 --- [restartedMain] com.belleza.pos.PosApiApplication        : Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-10-23T21:44:12.406-03:00  INFO 13768 --- [restartedMain] com.belleza.pos.PosApiApplication        : No active profile set, falling back to 1 default profile: "default"
+2025-10-23T21:44:12.434-03:00  INFO 13768 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-10-23T21:44:12.434-03:00  INFO 13768 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-10-23T21:44:12.972-03:00  INFO 13768 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-23T21:44:12.983-03:00  INFO 13768 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 10 ms. Found 0 JPA repository interfaces.
+2025-10-23T21:44:13.542-03:00  INFO 13768 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-10-23T21:44:13.558-03:00  INFO 13768 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-10-23T21:44:13.558-03:00  INFO 13768 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-10-23T21:44:13.615-03:00  INFO 13768 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/api]    : Initializing Spring embedded WebApplicationContext
+2025-10-23T21:44:13.615-03:00  INFO 13768 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1181 ms
+2025-10-23T21:44:13.619-03:00 ERROR 13768 --- [restartedMain] o.s.b.web.embedded.tomcat.TomcatStarter  : Error starting Tomcat context. Exception: org.springframework.beans.factory.UnsatisfiedDependencyException. Message: Error creating bean with name 'jwtAuthenticationFilter' defined in file [C:\Proyectos\POS_beauty\beauty_pos_api_rest\target\classes\com\belleza\pos\security\jwt\JwtAuthenticationFilter.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'org.springframework.security.core.userdetails.UserDetailsService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-10-23T21:44:13.635-03:00  INFO 13768 --- [restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2025-10-23T21:44:13.651-03:00  WARN 13768 --- [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Unable to start web server
+2025-10-23T21:44:13.651-03:00  INFO 13768 --- [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-10-23T21:44:13.666-03:00 ERROR 13768 --- [restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.belleza.pos.security.jwt.JwtAuthenticationFilter required a bean of type 'org.springframework.security.core.userdetails.UserDetailsService' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'org.springframework.security.core.userdetails.UserDetailsService' in your configuration.
+
