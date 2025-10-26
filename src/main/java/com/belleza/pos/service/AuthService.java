@@ -76,44 +76,44 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         // Validar que el username no exista
-        if (usuarioRepository.existsByUsername(request.getUsername())) {
+        if (usuarioRepository.existsByUsername(request.username())) {
             throw new BusinessException("El username ya está en uso");
         }
 
         // Validar que el email no exista (si se proporciona)
-        if (request.getEmail() != null && usuarioRepository.existsByEmail(request.getEmail())) {
+        if (request.email() != null && usuarioRepository.existsByEmail(request.email())) {
             throw new BusinessException("El email ya está en uso");
         }
 
         // Validar rol
         RolUsuario rol;
         try {
-            rol = RolUsuario.valueOf(request.getRol().toUpperCase());
+            rol = RolUsuario.valueOf(request.rol().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BusinessException("Rol inválido: " + request.getRol());
+            throw new BusinessException("Rol inválido: " + request.rol());
         }
 
         // Validar y obtener sucursal
         Sucursal sucursal = null;
-        if (request.getIdSucursal() != null) {
-            sucursal = sucursalRepository.findById(request.getIdSucursal())
+        if (request.idSucursal() != null) {
+            sucursal = sucursalRepository.findById(request.idSucursal())
                     .orElseThrow(() -> new BusinessException("Sucursal no encontrada"));
         }
 
         // Crear usuario
         Usuario usuario = new Usuario();
-        usuario.setUsername(request.getUsername());
-        usuario.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        usuario.setNombre(request.getNombre());
-        usuario.setApellido(request.getApellido());
-        usuario.setEmail(request.getEmail());
+        usuario.setUsername(request.username());
+        usuario.setPasswordHash(passwordEncoder.encode(request.password()));
+        usuario.setNombre(request.nombre());
+        usuario.setApellido(request.apellido());
+        usuario.setEmail(request.email());
         usuario.setRol(rol);
         usuario.setSucursal(sucursal);
         usuario.setActivo(true);
 
         usuario = usuarioRepository.save(usuario);
 
-        log.info("Usuario registrado exitosamente: {}", request.getUsername());
+        log.info("Usuario registrado exitosamente: {}", request.username());
 
         // Generar tokens
         String token = jwtUtil.generateTokenFromUsername(usuario.getUsername());
@@ -128,7 +128,7 @@ public class AuthService {
      */
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
+        String refreshToken = request.refreshToken();
 
         // Validar refresh token
         if (!jwtUtil.validateToken(refreshToken)) {
@@ -169,8 +169,8 @@ public class AuthService {
                 .apellido(usuario.getApellido())
                 .email(usuario.getEmail())
                 .rol(usuario.getRol().name())
-                .idSucursal(usuario.getSucursal() != null ? usuario.getSucursal().getIdSucursal() : null)
-                .nombreSucursal(usuario.getSucursal() != null ? usuario.getSucursal().getNombre() : null)
+                .idSucursal(usuario.getSucursal() != null ? usuario.getSucursal().idSucursal() : null)
+                .nombreSucursal(usuario.getSucursal() != null ? usuario.getSucursal().nombre() : null)
                 .build();
     }
 }
