@@ -1,22 +1,5 @@
 package com.belleza.pos.dto.request;
 
-import com.belleza.pos.config.OpenApiConfig;
-import com.belleza.pos.controller.*;
-import com.belleza.pos.dto.response.*;
-import com.belleza.pos.entity.ArticuloPrecio;
-import com.belleza.pos.entity.ArticuloProveedor;
-import com.belleza.pos.entity.ListaPrecio;
-import com.belleza.pos.entity.Usuario;
-import com.belleza.pos.entity.enums.RolUsuario;
-import com.belleza.pos.entity.enums.UnidadVenta;
-import com.belleza.pos.exception.BusinessException;
-import com.belleza.pos.exception.GlobalExceptionHandler;
-import com.belleza.pos.exception.ResourceNotFoundException;
-import com.belleza.pos.mapper.*;
-import com.belleza.pos.repository.*;
-import com.belleza.pos.security.service.CustomUserDetailsService;
-import com.belleza.pos.service.*;
-import com.belleza.pos.util.PasswordEncoderUtil;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,45 +8,44 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 /**
- * DTO para crear un nuevo cliente
- * @param nroCliente
- * @param nombre
- * @param apellido
- * @param tipoDocumento
- * @param nroDocumento
+ * DTO para crear un nuevo proveedor
+ * @param nroProveedor
+ * @param razonSocial
+ * @param nombreComercial
+ * @param cuit
  * @param telefono
  * @param celular
  * @param email
+ * @param paginaWeb
+ * @param personaContacto
  * @param calle
  * @param numero
  * @param localidad
  * @param provincia
  * @param codigoPostal
+ * @param informacionDomicilioAdicional
+ * @param ingresosBrutos
  * @param observaciones
  * @param cuentaCorrienteHabilitada
- * @param tipoCuenta
- * @param tipoLimite
  * @param limiteCredito
  * @param diasPlazoPago
  * @param condicionIva
  * @param activo
  */
+public record CreateProveedorRequest(
 
-public record CreateClienteRequest (
+    String nroProveedor,
 
-    String nroCliente,
+    @NotBlank(message = "La razón social es obligatoria")
+    @Size(max = 150, message = "La razón social no puede exceder los 150 caracteres")
+    String razonSocial,
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(max = 100, message = "El nombre no puede exceder los 100 caracteres")
-    String nombre,
+    @Size(max = 150, message = "El nombre comercial no puede exceder los 150 caracteres")
+    String nombreComercial,
 
-    @Size(max = 100, message = "El apellido no puede exceder los 100 caracteres")
-    String apellido,
-
-    String tipoDocumento, // DNI, CUIT, PASAPORTE, OTRO
-
-    @Size(max = 20, message = "El número de documento no puede exceder los 20 caracteres")
-    String nroDocumento,
+    @NotBlank(message = "El CUIT es obligatorio")
+    @Size(max = 13, message = "El CUIT no puede exceder los 13 caracteres")
+    String cuit,
 
     @Size(max = 20, message = "El teléfono no puede exceder los 20 caracteres")
     String telefono,
@@ -74,6 +56,12 @@ public record CreateClienteRequest (
     @Email(message = "El email debe ser válido")
     @Size(max = 100, message = "El email no puede exceder los 100 caracteres")
     String email,
+
+    @Size(max = 255, message = "La página web no puede exceder los 255 caracteres")
+    String paginaWeb,
+
+    @Size(max = 150, message = "La persona de contacto no puede exceder los 150 caracteres")
+    String personaContacto,
 
     @Size(max = 150, message = "La calle no puede exceder los 150 caracteres")
     String calle,
@@ -90,13 +78,14 @@ public record CreateClienteRequest (
     @Size(max = 10, message = "El código postal no puede exceder los 10 caracteres")
     String codigoPostal,
 
+    String informacionDomicilioAdicional,
+
+    @Size(max = 50, message = "Ingresos brutos no puede exceder los 50 caracteres")
+    String ingresosBrutos,
+
     String observaciones,
 
     Boolean cuentaCorrienteHabilitada,
-
-    String tipoCuenta, // INDIVIDUO, EMPRESA
-
-    String tipoLimite, // ILIMITADA, LIMITADA
 
     @DecimalMin(value = "0.0", message = "El límite de crédito no puede ser negativo")
     BigDecimal limiteCredito,
@@ -107,43 +96,47 @@ public record CreateClienteRequest (
 
     Boolean activo
 ) {
-    public CreateClienteRequest(
-            String nroCliente,
-            String nombre,
-            String apellido,
-            String tipoDocumento,
-            String nroDocumento,
+    public CreateProveedorRequest(
+            String nroProveedor,
+            String razonSocial,
+            String nombreComercial,
+            String cuit,
             String telefono,
             String celular,
             String email,
+            String paginaWeb,
+            String personaContacto,
             String calle,
             String numero,
             String localidad,
             String provincia,
             String codigoPostal,
+            String informacionDomicilioAdicional,
+            String ingresosBrutos,
             String observaciones
     ) {
         this(
-                nroCliente,
-                nombre,
-                apellido,
-                tipoDocumento,
-                nroDocumento,
+                nroProveedor,
+                razonSocial,
+                nombreComercial,
+                cuit,
                 telefono,
                 celular,
                 email,
+                paginaWeb,
+                personaContacto,
                 calle,
                 numero,
                 localidad,
                 provincia,
                 codigoPostal,
+                informacionDomicilioAdicional,
+                ingresosBrutos,
                 observaciones,
                 false,
-                "INDIVIDUO",
-                "LIMITADA",
                 BigDecimal.ZERO,
                 0,
-                "CONSUMIDOR_FINAL",
+                "RESPONSABLE_INSCRIPTO",
                 true
         );
     }
