@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 /**
  * Entidad que contiene detalles referenctes a un articulo seleccionado para un presupuesto
  */
+
 @Entity
-@Table(name = "compras_detalle")
+@Table(name = "presupuestos_detalle")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class CompraDetalle extends DetalleOperacion{
+public class PresupuestoDetalle extends DetalleOperacion{
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_compra", nullable = false)
-    private Compra compra;
-
+    @JoinColumn(name = "id_presupuesto", nullable = false)
+    private Presupuesto presupuesto;
 }

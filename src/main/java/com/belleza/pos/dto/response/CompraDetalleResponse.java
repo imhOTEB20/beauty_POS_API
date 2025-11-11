@@ -1,41 +1,18 @@
 package com.belleza.pos.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 /**
  * DTO para respuesta de detalle de compra
  */
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-public class CompraDetalleResponse {
-
-    private Integer idDetalle;
+@EqualsAndHashCode(callSuper = true)
+public class CompraDetalleResponse extends DetalleOperacionResponse {
 
     private Integer idCompra;
-
-    private Integer numeroLinea;
-
-    private Integer idArticulo;
-
-    private String codigoBarras;
-
-    private String descripcion;
-
-    private BigDecimal cantidad;
-
-    private BigDecimal precioSinIva;
-
-    private BigDecimal porcentajeIva;
-
-    private BigDecimal precioUnitarioSinIva;
-
-    private BigDecimal precioUnitarioConIva;
-
-    private BigDecimal totalSinImpuestos;
 }
