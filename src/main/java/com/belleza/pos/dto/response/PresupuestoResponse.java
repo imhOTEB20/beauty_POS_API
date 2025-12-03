@@ -1,3 +1,6 @@
+// ==========================================
+// PresupuestoResponse.java
+// ==========================================
 package com.belleza.pos.dto.response;
 
 import lombok.AllArgsConstructor;
@@ -18,31 +21,28 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PresupuestoResponse {
-
     private Integer idPresupuesto;
     private String nroPresupuesto;
 
     // Cliente
     private Integer idCliente;
     private String nombreCliente;
-    private String apellidoCliente;
-    private String nroDocumentoCliente;
+    private String documentoCliente;
 
     // Usuario
     private Integer idUsuario;
     private String nombreUsuario;
-    private String apellidoUsuario;
 
     // Sucursal
     private Integer idSucursal;
     private String nombreSucursal;
 
-    // Fecha
-    private LocalDate fechaPresupuesto;
-
     // Lista de precios
     private Integer idListaPrecio;
     private String nombreListaPrecio;
+
+    // Fecha
+    private LocalDate fechaPresupuesto;
 
     // Totales
     private BigDecimal subtotal;
@@ -52,19 +52,16 @@ public class PresupuestoResponse {
 
     // Estado
     private String estado;
-    private String estadoDescripcion;
-
-    // Venta generada
     private Integer idVentaGenerada;
-    private String nroTransaccionVenta;
-
-    // Auditoría
-    private LocalDateTime fechaCreacion;
     private String observaciones;
 
     // Detalles
     private List<PresupuestoDetalleResponse> detalles;
 
-    // Información adicional
-    private Integer cantidadArticulos;
+    // Auditoría
+    private LocalDateTime fechaCreacion;
+
+    // Validez
+    private Integer diasValidez;
+    private Boolean vigente;
 }

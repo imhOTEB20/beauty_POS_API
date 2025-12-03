@@ -1,18 +1,32 @@
+// ==========================================
+// PresupuestoDetalleResponse.java
+// ==========================================
 package com.belleza.pos.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+
+import java.math.BigDecimal;
 
 /**
  * DTO para respuesta de detalle de presupuesto
  */
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class PresupuestoDetalleResponse extends DetalleOperacionResponse {
-
-    private Integer idPresupuesto;
+@AllArgsConstructor
+public class PresupuestoDetalleResponse {
+    private Integer idDetalle;
+    private Integer numeroLinea;
+    private Integer idArticulo;
+    private String codigoBarras;
+    private String descripcion;
+    private BigDecimal cantidad;
+    private BigDecimal precioSinIva;
+    private BigDecimal porcentajeIva;
+    private BigDecimal precioUnitarioConIva;
+    private BigDecimal totalSinImpuestos;
+    private BigDecimal totalConIva;
 }

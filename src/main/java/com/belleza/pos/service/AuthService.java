@@ -45,8 +45,8 @@ public class AuthService {
         // Autenticar usuario
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
+                        request.username(),
+                        request.password()
                 )
         );
 
@@ -54,17 +54,17 @@ public class AuthService {
 
         // Generar tokens
         String token = jwtUtil.generateToken(authentication);
-        String refreshToken = jwtUtil.generateRefreshToken(request.getUsername());
+        String refreshToken = jwtUtil.generateRefreshToken(request.username());
 
         // Obtener usuario
-        Usuario usuario = usuarioRepository.findByUsername(request.getUsername())
+        Usuario usuario = usuarioRepository.findByUsername(request.username())
                 .orElseThrow(() -> new BusinessException("Usuario no encontrado"));
 
         // Actualizar último login
         usuario.setUltimoLogin(LocalDateTime.now());
         usuarioRepository.save(usuario);
 
-        log.info("Usuario autenticado exitosamente: {}", request.getUsername());
+        log.info("Usuario autenticado exitosamente: {}", request.username());
 
         // Construir respuesta
         return buildAuthResponse(usuario, token, refreshToken);
@@ -169,8 +169,8 @@ public class AuthService {
                 .apellido(usuario.getApellido())
                 .email(usuario.getEmail())
                 .rol(usuario.getRol().name())
-                .idSucursal(usuario.getSucursal() != null ? usuario.getSucursal().idSucursal() : null)
-                .nombreSucursal(usuario.getSucursal() != null ? usuario.getSucursal().nombre() : null)
+                .idSucursal(usuario.getSucursal() != null ? usuario.getSucursal().getIdSucursal() : null)
+                .nombreSucursal(usuario.getSucursal() != null ? usuario.getSucursal().getNombre() : null)
                 .build();
     }
 }
