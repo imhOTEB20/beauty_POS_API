@@ -1,6 +1,8 @@
+// ==========================================
+// Presupuesto.java
+// ==========================================
 package com.belleza.pos.entity;
 
-import com.belleza.pos.entity.enums.EstadoPresupuesto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +50,6 @@ public class Presupuesto {
     @Column(name = "fecha_presupuesto", nullable = false)
     private LocalDate fechaPresupuesto;
 
-    // Lista de precios
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_lista_precio", nullable = false)
     private ListaPrecio listaPrecio;
@@ -63,37 +64,23 @@ public class Presupuesto {
     @Column(name = "iva_10_5", precision = 15, scale = 2)
     private BigDecimal iva105 = BigDecimal.ZERO;
 
-    @Column(name = "total", nullable = false, precision = 15, scale = 2)
-    private BigDecimal total = BigDecimal.ZERO;
+    @Column(name = "total", precision = 15, scale = 2, nullable = false)
+    private BigDecimal total;
 
     // Estado
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, length = 20)
-    private EstadoPresupuesto estado = EstadoPresupuesto.PENDIENTE;
+    @Column(name = "estado", length = 30, nullable = false)
+    private String estado = "PENDIENTE"; // PENDIENTE, APROBADO, RECHAZADO, CONVERTIDO_VENTA
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_venta_generada")
-    private Venta ventaGenerada;
-
-    @CreatedDate
-    @Column(name = "fecha_creacion", nullable = false, updatable = false)
-    private LocalDateTime fechaCreacion;
+    @Column(name = "id_venta_generada")
+    private Integer idVentaGenerada;
 
     @Column(name = "observaciones", columnDefinition = "TEXT")
     private String observaciones;
 
-    // Relaciones
     @OneToMany(mappedBy = "presupuesto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PresupuestoDetalle> detalles = new ArrayList<>();
 
-    // Métodos helper
-    public void addDetalle(PresupuestoDetalle detalle) {
-        detalles.add(detalle);
-        detalle.setPresupuesto(this);
-    }
-
-    public void removeDetalle(PresupuestoDetalle detalle) {
-        detalles.remove(detalle);
-        detalle.setPresupuesto(null);
-    }
+    @CreatedDate
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
 }

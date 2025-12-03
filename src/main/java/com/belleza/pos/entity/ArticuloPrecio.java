@@ -1,9 +1,7 @@
 package com.belleza.pos.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,9 +12,12 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "articulos_precios",
         uniqueConstraints = @UniqueConstraint(columnNames = {"id_articulo", "id_lista"}))
-@Data
+@Setter
+@Getter
+@ToString(exclude = {"articulo", "listaPrecio"})
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ArticuloPrecio {
 
     @Id

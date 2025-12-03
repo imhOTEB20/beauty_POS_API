@@ -1,10 +1,7 @@
 package com.belleza.pos.controller;
 
-import com.belleza.pos.dto.request.CreatePresupuestoRequest;
-import com.belleza.pos.dto.response.MessageResponse;
-import com.belleza.pos.dto.response.PresupuestoResponse;
-import com.belleza.pos.dto.response.PresupuestoSimpleResponse;
-import com.belleza.pos.dto.response.VentaResponse;
+import com.belleza.pos.dto.request.*;
+import com.belleza.pos.dto.response.*;
 import com.belleza.pos.service.PresupuestoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,12 +40,25 @@ public class PresupuestoController {
     /**
      * Crear un nuevo presupuesto
      */
-    @Operation(summary = "Crear presupuesto", description = "Registra un nuevo presupuesto en el sistema")
+    @Operation(summary = "Crear presupuesto", description = "Crea un nuevo presupuesto en el sistema")
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<PresupuestoResponse> create(@Valid @RequestBody CreatePresupuestoRequest request) {
         PresupuestoResponse response = presupuestoService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Actualizar un presupuesto existente
+     */
+    @Operation(summary = "Actualizar presupuesto", description = "Actualiza los datos de un presupuesto existente")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<PresupuestoResponse> update(
+            @Parameter(description = "ID del presupuesto") @PathVariable Integer id,
+            @Valid @RequestBody UpdatePresupuestoRequest request) {
+        PresupuestoResponse response = presupuestoService.update(id, request);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -65,7 +76,7 @@ public class PresupuestoController {
     /**
      * Obtener presupuesto por número
      */
-    @Operation(summary = "Obtener presupuesto por número", description = "Busca un presupuesto por su número")
+    @Operation(summary = "Obtener por número", description = "Busca un presupuesto por su número")
     @GetMapping("/numero/{nroPresupuesto}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<PresupuestoResponse> getByNroPresupuesto(
@@ -93,6 +104,17 @@ public class PresupuestoController {
     }
 
     /**
+     * Obtener todos los presupuestos pendientes
+     */
+    @Operation(summary = "Listar pendientes", description = "Obtiene todos los presupuestos pendientes")
+    @GetMapping("/pendientes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoSimpleResponse>> getAllPendientes() {
+        List<PresupuestoSimpleResponse> response = presupuestoService.getAllPendientes();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Buscar presupuestos
      */
     @Operation(summary = "Buscar presupuestos", description = "Busca presupuestos por número o cliente")
@@ -103,130 +125,15 @@ public class PresupuestoController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fechaPresupuesto"));
+        Pageable pageable = PageRequest.of(page, size);
         Page<PresupuestoResponse> response = presupuestoService.search(q, pageable);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Eliminar un presupuesto permanentemente
+     * Obtener presupuestos por cliente
      */
-    @Operation(summary = "Eliminar presupuesto", description = "Elimina un presupuesto de forma permanente")
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> delete(
-            @Parameter(description = "ID del presupuesto") @PathVariable Integer id) {
-        presupuestoService.delete(id);
-        return ResponseEntity.ok(new MessageResponse("Presupuesto eliminado exitosamente"));
-    }
-
-    // ========== Gestión de Estado ==========
-
-    /**
-     * Aprobar un presupuesto
-     */
-    @Operation(summary = "Aprobar presupuesto", description = "Aprueba un presupuesto pendiente")
-    @PatchMapping("/{id}/aprobar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
-    public ResponseEntity<PresupuestoResponse> aprobar(
-            @Parameter(description = "ID del presupuesto") @PathVariable Integer id) {
-        PresupuestoResponse response = presupuestoService.aprobar(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Rechazar un presupuesto
-     */
-    @Operation(summary = "Rechazar presupuesto", description = "Rechaza un presupuesto pendiente")
-    @PatchMapping("/{id}/rechazar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
-    public ResponseEntity<PresupuestoResponse> rechazar(
-            @Parameter(description = "ID del presupuesto") @PathVariable Integer id,
-            @Parameter(description = "Motivo del rechazo") @RequestParam String motivo) {
-        PresupuestoResponse response = presupuestoService.rechazar(id, motivo);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Convertir presupuesto a venta
-     */
-    @Operation(summary = "Convertir a venta", description = "Convierte un presupuesto aprobado en una venta")
-    @PostMapping("/{id}/convertir-venta")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<VentaResponse> convertirAVenta(
-            @Parameter(description = "ID del presupuesto") @PathVariable Integer id) {
-        VentaResponse response = presupuestoService.convertirAVenta(id);
-        return ResponseEntity.ok(response);
-    }
-
-    // ========== Consultas por Estado ==========
-
-    /**
-     * Obtener presupuestos por estado
-     */
-    @Operation(summary = "Listar por estado", description = "Obtiene presupuestos filtrados por estado")
-    @GetMapping("/estado/{estado}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<Page<PresupuestoResponse>> getByEstado(
-            @Parameter(description = "Estado del presupuesto") @PathVariable String estado,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fechaPresupuesto"));
-        Page<PresupuestoResponse> response = presupuestoService.getByEstado(estado, pageable);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Obtener presupuestos pendientes
-     */
-    @Operation(summary = "Presupuestos pendientes", description = "Obtiene todos los presupuestos pendientes")
-    @GetMapping("/pendientes")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosPendientes() {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosPendientes();
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Obtener presupuestos aprobados
-     */
-    @Operation(summary = "Presupuestos aprobados", description = "Obtiene todos los presupuestos aprobados")
-    @GetMapping("/aprobados")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosAprobados() {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosAprobados();
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Obtener presupuestos rechazados
-     */
-    @Operation(summary = "Presupuestos rechazados", description = "Obtiene todos los presupuestos rechazados")
-    @GetMapping("/rechazados")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosRechazados() {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosRechazados();
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Obtener presupuestos convertidos a venta
-     */
-    @Operation(summary = "Presupuestos convertidos", description = "Obtiene todos los presupuestos convertidos a venta")
-    @GetMapping("/convertidos")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosConvertidos() {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosConvertidos();
-        return ResponseEntity.ok(response);
-    }
-
-    // ========== Consultas por Cliente ==========
-
-    /**
-     * Obtener presupuestos de un cliente
-     */
-    @Operation(summary = "Listar por cliente", description = "Obtiene los presupuestos de un cliente específico")
+    @Operation(summary = "Listar por cliente", description = "Obtiene presupuestos de un cliente específico")
     @GetMapping("/cliente/{idCliente}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<Page<PresupuestoResponse>> getByCliente(
@@ -240,23 +147,9 @@ public class PresupuestoController {
     }
 
     /**
-     * Obtener historial de presupuestos de un cliente
+     * Obtener presupuestos por sucursal
      */
-    @Operation(summary = "Historial del cliente", description = "Obtiene el historial completo de presupuestos de un cliente")
-    @GetMapping("/cliente/{idCliente}/historial")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getHistorialCliente(
-            @Parameter(description = "ID del cliente") @PathVariable Integer idCliente) {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getHistorialCliente(idCliente);
-        return ResponseEntity.ok(response);
-    }
-
-    // ========== Consultas por Sucursal ==========
-
-    /**
-     * Obtener presupuestos de una sucursal
-     */
-    @Operation(summary = "Listar por sucursal", description = "Obtiene los presupuestos de una sucursal específica")
+    @Operation(summary = "Listar por sucursal", description = "Obtiene presupuestos de una sucursal")
     @GetMapping("/sucursal/{idSucursal}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Page<PresupuestoResponse>> getBySucursal(
@@ -270,23 +163,9 @@ public class PresupuestoController {
     }
 
     /**
-     * Obtener presupuestos del día de una sucursal
+     * Obtener presupuestos por usuario
      */
-    @Operation(summary = "Presupuestos del día por sucursal", description = "Obtiene los presupuestos del día de una sucursal")
-    @GetMapping("/sucursal/{idSucursal}/dia")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosDelDiaBySucursal(
-            @Parameter(description = "ID de la sucursal") @PathVariable Integer idSucursal) {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosDelDiaBySucursal(idSucursal);
-        return ResponseEntity.ok(response);
-    }
-
-    // ========== Consultas por Usuario ==========
-
-    /**
-     * Obtener presupuestos de un usuario
-     */
-    @Operation(summary = "Listar por usuario", description = "Obtiene los presupuestos realizados por un usuario")
+    @Operation(summary = "Listar por usuario", description = "Obtiene presupuestos creados por un usuario")
     @GetMapping("/usuario/{idUsuario}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public ResponseEntity<Page<PresupuestoResponse>> getByUsuario(
@@ -299,110 +178,200 @@ public class PresupuestoController {
         return ResponseEntity.ok(response);
     }
 
-    // ========== Consultas por Fecha ==========
-
     /**
-     * Obtener presupuestos del día
+     * Obtener presupuestos por estado
      */
-    @Operation(summary = "Presupuestos del día", description = "Obtiene todos los presupuestos del día actual")
-    @GetMapping("/dia")
+    @Operation(summary = "Listar por estado", description = "Obtiene presupuestos por estado")
+    @GetMapping("/estado/{estado}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosDelDia() {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosDelDia();
+    public ResponseEntity<Page<PresupuestoResponse>> getByEstado(
+            @Parameter(description = "Estado") @PathVariable String estado,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fechaPresupuesto"));
+        Page<PresupuestoResponse> response = presupuestoService.getByEstado(estado, pageable);
         return ResponseEntity.ok(response);
     }
 
     /**
      * Obtener presupuestos entre fechas
      */
-    @Operation(summary = "Listar por período", description = "Obtiene presupuestos en un rango de fechas")
+    @Operation(summary = "Listar por período", description = "Obtiene presupuestos entre fechas")
     @GetMapping("/periodo")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<Page<PresupuestoResponse>> getByFechaPresupuestoBetween(
-            @Parameter(description = "Fecha inicio (yyyy-MM-dd)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @Parameter(description = "Fecha fin (yyyy-MM-dd)")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fechaPresupuesto"));
-        Page<PresupuestoResponse> response = presupuestoService.getByFechaPresupuestoBetween(fechaInicio, fechaFin, pageable);
+    public ResponseEntity<List<PresupuestoResponse>> getByPeriodo(
+            @Parameter(description = "Fecha inicio") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @Parameter(description = "Fecha fin") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        List<PresupuestoResponse> response = presupuestoService.getByFechaBetween(fechaInicio, fechaFin);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Obtener presupuestos de un período (sin paginación)
+     * Eliminar un presupuesto permanentemente
      */
-    @Operation(summary = "Presupuestos por período simple", description = "Obtiene presupuestos de un período sin paginación")
-    @GetMapping("/periodo/simple")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosByPeriodo(
-            @Parameter(description = "Fecha inicio")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @Parameter(description = "Fecha fin")
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
-        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosByPeriodo(fechaInicio, fechaFin);
+    @Operation(summary = "Eliminar permanentemente", description = "Elimina un presupuesto de forma permanente")
+    @DeleteMapping("/{id}/permanente")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deletePermanently(
+            @Parameter(description = "ID del presupuesto") @PathVariable Integer id) {
+        presupuestoService.deletePermanently(id);
+        return ResponseEntity.ok(new MessageResponse("Presupuesto eliminado permanentemente"));
+    }
+
+    // ========== Gestión de Estados ==========
+
+    /**
+     * Aprobar un presupuesto
+     */
+    @Operation(summary = "Aprobar presupuesto", description = "Aprueba un presupuesto pendiente")
+    @PostMapping("/{id}/aprobar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public ResponseEntity<PresupuestoResponse> aprobar(
+            @Parameter(description = "ID del presupuesto") @PathVariable Integer id,
+            @Valid @RequestBody AprobarPresupuestoRequest request) {
+        PresupuestoResponse response = presupuestoService.aprobar(id, request);
         return ResponseEntity.ok(response);
     }
 
-    // ========== Estadísticas ==========
-
     /**
-     * Contar presupuestos del día
+     * Rechazar un presupuesto
      */
-    @Operation(summary = "Contar presupuestos del día", description = "Obtiene la cantidad de presupuestos del día")
-    @GetMapping("/count/dia")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<MessageResponse> countPresupuestosDelDia() {
-        Long count = presupuestoService.countPresupuestosDelDia();
-        return ResponseEntity.ok(MessageResponse.builder()
-                .message("Cantidad de presupuestos del día")
-                .data(count)
-                .build());
-    }
-
-    /**
-     * Contar presupuestos del día por sucursal
-     */
-    @Operation(summary = "Contar presupuestos del día por sucursal", description = "Obtiene la cantidad de presupuestos del día en una sucursal")
-    @GetMapping("/count/dia/sucursal/{idSucursal}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
-    public ResponseEntity<MessageResponse> countPresupuestosDelDiaBySucursal(
-            @Parameter(description = "ID de la sucursal") @PathVariable Integer idSucursal) {
-        Long count = presupuestoService.countPresupuestosDelDiaBySucursal(idSucursal);
-        return ResponseEntity.ok(MessageResponse.builder()
-                .message("Cantidad de presupuestos del día de la sucursal")
-                .data(count)
-                .build());
-    }
-
-    /**
-     * Contar presupuestos pendientes
-     */
-    @Operation(summary = "Contar presupuestos pendientes", description = "Obtiene la cantidad total de presupuestos pendientes")
-    @GetMapping("/count/pendientes")
+    @Operation(summary = "Rechazar presupuesto", description = "Rechaza un presupuesto")
+    @PostMapping("/{id}/rechazar")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
-    public ResponseEntity<MessageResponse> countPresupuestosPendientes() {
-        Long count = presupuestoService.countPresupuestosPendientes();
+    public ResponseEntity<PresupuestoResponse> rechazar(
+            @Parameter(description = "ID del presupuesto") @PathVariable Integer id,
+            @Valid @RequestBody RechazarPresupuestoRequest request) {
+        PresupuestoResponse response = presupuestoService.rechazar(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Convertir presupuesto en venta
+     */
+    @Operation(summary = "Convertir en venta", description = "Convierte un presupuesto en una venta")
+    @PostMapping("/{id}/convertir-venta")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<PresupuestoResponse> convertirEnVenta(
+            @Parameter(description = "ID del presupuesto") @PathVariable Integer id,
+            @Valid @RequestBody ConvertirPresupuestoVentaRequest request) {
+        PresupuestoResponse response = presupuestoService.convertirEnVenta(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    // ========== Gestión de Detalles ==========
+
+    /**
+     * Obtener detalles de un presupuesto
+     */
+    @Operation(summary = "Obtener detalles", description = "Obtiene los detalles de un presupuesto")
+    @GetMapping("/{id}/detalles")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoDetalleResponse>> getDetalles(
+            @Parameter(description = "ID del presupuesto") @PathVariable Integer id) {
+        List<PresupuestoDetalleResponse> response = presupuestoService.getDetalles(id);
+        return ResponseEntity.ok(response);
+    }
+
+    // ========== Consultas y Reportes ==========
+
+    /**
+     * Obtener presupuestos por cliente y período
+     */
+    @Operation(summary = "Listar por cliente y período", description = "Obtiene presupuestos de un cliente entre fechas")
+    @GetMapping("/cliente/{idCliente}/periodo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoResponse>> getByClienteAndPeriodo(
+            @Parameter(description = "ID del cliente") @PathVariable Integer idCliente,
+            @Parameter(description = "Fecha inicio") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @Parameter(description = "Fecha fin") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        List<PresupuestoResponse> response = presupuestoService.getByClienteAndFechaBetween(
+                idCliente, fechaInicio, fechaFin);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener presupuestos por sucursal y período
+     */
+    @Operation(summary = "Listar por sucursal y período", description = "Obtiene presupuestos de una sucursal entre fechas")
+    @GetMapping("/sucursal/{idSucursal}/periodo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public ResponseEntity<List<PresupuestoResponse>> getBySucursalAndPeriodo(
+            @Parameter(description = "ID de la sucursal") @PathVariable Integer idSucursal,
+            @Parameter(description = "Fecha inicio") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @Parameter(description = "Fecha fin") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        List<PresupuestoResponse> response = presupuestoService.getBySucursalAndFechaBetween(
+                idSucursal, fechaInicio, fechaFin);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener presupuestos vencidos
+     */
+    @Operation(summary = "Listar vencidos", description = "Obtiene presupuestos vencidos")
+    @GetMapping("/vencidos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosVencidos(
+            @Parameter(description = "Días de validez") @RequestParam(defaultValue = "30") Integer diasValidez) {
+        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosVencidos(diasValidez);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener presupuestos vigentes
+     */
+    @Operation(summary = "Listar vigentes", description = "Obtiene presupuestos vigentes")
+    @GetMapping("/vigentes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosVigentes() {
+        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosVigentes();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Contar presupuestos por estado
+     */
+    @Operation(summary = "Contar por estado", description = "Cuenta presupuestos por estado")
+    @GetMapping("/reportes/contar/{estado}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public ResponseEntity<MessageResponse> countByEstado(
+            @Parameter(description = "Estado") @PathVariable String estado) {
+        Long count = presupuestoService.countByEstado(estado);
         return ResponseEntity.ok(MessageResponse.builder()
-                .message("Cantidad de presupuestos pendientes")
+                .message("Cantidad de presupuestos en estado " + estado)
                 .data(count)
                 .build());
     }
 
     /**
-     * Contar presupuestos convertidos
+     * Calcular total por estado y período
      */
-    @Operation(summary = "Contar presupuestos convertidos", description = "Obtiene la cantidad total de presupuestos convertidos a venta")
-    @GetMapping("/count/convertidos")
+    @Operation(summary = "Total por estado y período", description = "Calcula el total de presupuestos por estado en un período")
+    @GetMapping("/reportes/total")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
-    public ResponseEntity<MessageResponse> countPresupuestosConvertidos() {
-        Long count = presupuestoService.countPresupuestosConvertidos();
+    public ResponseEntity<MessageResponse> calcularTotal(
+            @Parameter(description = "Estado") @RequestParam String estado,
+            @Parameter(description = "Fecha inicio") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @Parameter(description = "Fecha fin") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        BigDecimal total = presupuestoService.calcularTotalPorEstadoYPeriodo(estado, fechaInicio, fechaFin);
         return ResponseEntity.ok(MessageResponse.builder()
-                .message("Cantidad de presupuestos convertidos")
-                .data(count)
+                .message("Total de presupuestos en estado " + estado)
+                .data(total)
                 .build());
+    }
+
+    /**
+     * Obtener estadísticas de presupuestos
+     */
+    @Operation(summary = "Estadísticas", description = "Obtiene estadísticas de presupuestos en un período")
+    @GetMapping("/reportes/estadisticas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public ResponseEntity<EstadisticasPresupuestoResponse> getEstadisticas(
+            @Parameter(description = "Fecha inicio") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @Parameter(description = "Fecha fin") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        EstadisticasPresupuestoResponse response = presupuestoService.getEstadisticas(fechaInicio, fechaFin);
+        return ResponseEntity.ok(response);
     }
 
     // ========== Utilidades ==========
@@ -410,7 +379,7 @@ public class PresupuestoController {
     /**
      * Verificar número de presupuesto
      */
-    @Operation(summary = "Verificar número de presupuesto", description = "Verifica si un número de presupuesto ya existe")
+    @Operation(summary = "Verificar número", description = "Verifica si un número de presupuesto ya existe")
     @GetMapping("/verificar/numero/{nroPresupuesto}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<MessageResponse> checkNroPresupuesto(
@@ -424,10 +393,32 @@ public class PresupuestoController {
     }
 
     /**
-     * Generar número de presupuesto
+     * Obtener presupuestos del día
      */
-    @Operation(summary = "Generar número de presupuesto", description = "Genera un número de presupuesto único")
-    @GetMapping("/generar/numero")
+    @Operation(summary = "Presupuestos del día", description = "Obtiene los presupuestos del día actual")
+    @GetMapping("/hoy")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosDelDia() {
+        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosDelDia();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener presupuestos del mes
+     */
+    @Operation(summary = "Presupuestos del mes", description = "Obtiene los presupuestos del mes actual")
+    @GetMapping("/mes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    public ResponseEntity<List<PresupuestoSimpleResponse>> getPresupuestosDelMes() {
+        List<PresupuestoSimpleResponse> response = presupuestoService.getPresupuestosDelMes();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Generar número de presupuesto automático
+     */
+    @Operation(summary = "Generar número", description = "Genera un número de presupuesto automático")
+    @GetMapping("/generar-numero")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
     public ResponseEntity<MessageResponse> generarNroPresupuesto() {
         String nroPresupuesto = presupuestoService.generarNroPresupuesto();

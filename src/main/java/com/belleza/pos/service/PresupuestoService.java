@@ -1,14 +1,7 @@
 package com.belleza.pos.service;
 
-import com.belleza.pos.dto.request.CreatePresupuestoRequest;
-/*
-Por el momento no se permite actualizar un presupuesto, simplemente se cambia su estado a cancelado o rechazado
-como lo decida el usuario o la circunstancia.
-import com.belleza.pos.dto.request.UpdatePresupuestoRequest;
- */
-import com.belleza.pos.dto.response.PresupuestoResponse;
-import com.belleza.pos.dto.response.PresupuestoSimpleResponse;
-import com.belleza.pos.dto.response.VentaResponse;
+import com.belleza.pos.dto.request.*;
+import com.belleza.pos.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,6 +21,11 @@ public interface PresupuestoService {
     PresupuestoResponse create(CreatePresupuestoRequest request);
 
     /**
+     * Actualiza un presupuesto existente
+     */
+    PresupuestoResponse update(Integer id, UpdatePresupuestoRequest request);
+
+    /**
      * Obtiene un presupuesto por ID
      */
     PresupuestoResponse getById(Integer id);
@@ -43,33 +41,29 @@ public interface PresupuestoService {
     Page<PresupuestoResponse> getAll(Pageable pageable);
 
     /**
+     * Obtiene todos los presupuestos pendientes
+     */
+    List<PresupuestoSimpleResponse> getAllPendientes();
+
+    /**
      * Busca presupuestos por término de búsqueda
      */
     Page<PresupuestoResponse> search(String searchTerm, Pageable pageable);
 
     /**
-     * Elimina un presupuesto permanentemente
+     * Obtiene presupuestos por cliente
      */
-    void delete(Integer id);
-
-    // ========== Gestión de Estado ==========
+    Page<PresupuestoResponse> getByCliente(Integer idCliente, Pageable pageable);
 
     /**
-     * Aprueba un presupuesto
+     * Obtiene presupuestos por sucursal
      */
-    PresupuestoResponse aprobar(Integer id);
+    Page<PresupuestoResponse> getBySucursal(Integer idSucursal, Pageable pageable);
 
     /**
-     * Rechaza un presupuesto
+     * Obtiene presupuestos por usuario
      */
-    PresupuestoResponse rechazar(Integer id, String motivo);
-
-    /**
-     * Convierte un presupuesto a venta
-     */
-    VentaResponse convertirAVenta(Integer id);
-
-    // ========== Consultas por Estado ==========
+    Page<PresupuestoResponse> getByUsuario(Integer idUsuario, Pageable pageable);
 
     /**
      * Obtiene presupuestos por estado
@@ -77,97 +71,88 @@ public interface PresupuestoService {
     Page<PresupuestoResponse> getByEstado(String estado, Pageable pageable);
 
     /**
-     * Obtiene presupuestos pendientes
-     */
-    List<PresupuestoSimpleResponse> getPresupuestosPendientes();
-
-    /**
-     * Obtiene presupuestos aprobados
-     */
-    List<PresupuestoSimpleResponse> getPresupuestosAprobados();
-
-    /**
-     * Obtiene presupuestos rechazados
-     */
-    List<PresupuestoSimpleResponse> getPresupuestosRechazados();
-
-    /**
-     * Obtiene presupuestos convertidos a venta
-     */
-    List<PresupuestoSimpleResponse> getPresupuestosConvertidos();
-
-    // ========== Consultas por Cliente ==========
-
-    /**
-     * Obtiene presupuestos de un cliente
-     */
-    Page<PresupuestoResponse> getByCliente(Integer idCliente, Pageable pageable);
-
-    /**
-     * Obtiene historial de presupuestos de un cliente
-     */
-    List<PresupuestoSimpleResponse> getHistorialCliente(Integer idCliente);
-
-    // ========== Consultas por Sucursal ==========
-
-    /**
-     * Obtiene presupuestos de una sucursal
-     */
-    Page<PresupuestoResponse> getBySucursal(Integer idSucursal, Pageable pageable);
-
-    /**
-     * Obtiene presupuestos del día de una sucursal
-     */
-    List<PresupuestoSimpleResponse> getPresupuestosDelDiaBySucursal(Integer idSucursal);
-
-    // ========== Consultas por Usuario ==========
-
-    /**
-     * Obtiene presupuestos de un usuario
-     */
-    Page<PresupuestoResponse> getByUsuario(Integer idUsuario, Pageable pageable);
-
-    // ========== Consultas por Fecha ==========
-
-    /**
-     * Obtiene presupuestos del día
-     */
-    List<PresupuestoSimpleResponse> getPresupuestosDelDia();
-
-    /**
      * Obtiene presupuestos entre fechas
      */
-    Page<PresupuestoResponse> getByFechaPresupuestoBetween(LocalDate fechaInicio,
-                                                           LocalDate fechaFin,
-                                                           Pageable pageable);
+    List<PresupuestoResponse> getByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
 
     /**
-     * Obtiene presupuestos de un período
+     * Elimina un presupuesto permanentemente
      */
-    List<PresupuestoSimpleResponse> getPresupuestosByPeriodo(LocalDate fechaInicio,
-                                                             LocalDate fechaFin);
+    void deletePermanently(Integer id);
 
-    // ========== Estadísticas ==========
-
-    /**
-     * Cuenta presupuestos del día
-     */
-    Long countPresupuestosDelDia();
+    // ========== Gestión de Estados ==========
 
     /**
-     * Cuenta presupuestos del día por sucursal
+     * Aprueba un presupuesto
      */
-    Long countPresupuestosDelDiaBySucursal(Integer idSucursal);
+    PresupuestoResponse aprobar(Integer id, AprobarPresupuestoRequest request);
 
     /**
-     * Cuenta presupuestos pendientes
+     * Rechaza un presupuesto
      */
-    Long countPresupuestosPendientes();
+    PresupuestoResponse rechazar(Integer id, RechazarPresupuestoRequest request);
 
     /**
-     * Cuenta presupuestos convertidos
+     * Convierte un presupuesto en venta
+     * NOTA: Implementación simplificada, cuando se implemente Ventas se completará
      */
-    Long countPresupuestosConvertidos();
+    PresupuestoResponse convertirEnVenta(Integer id, ConvertirPresupuestoVentaRequest request);
+
+    // ========== Gestión de Detalles ==========
+
+    /**
+     * Obtiene los detalles de un presupuesto
+     */
+    List<PresupuestoDetalleResponse> getDetalles(Integer idPresupuesto);
+
+    // ========== Consultas y Reportes ==========
+
+    /**
+     * Obtiene presupuestos por cliente entre fechas
+     */
+    List<PresupuestoResponse> getByClienteAndFechaBetween(
+            Integer idCliente,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    );
+
+    /**
+     * Obtiene presupuestos por sucursal entre fechas
+     */
+    List<PresupuestoResponse> getBySucursalAndFechaBetween(
+            Integer idSucursal,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    );
+
+    /**
+     * Obtiene presupuestos vencidos
+     */
+    List<PresupuestoSimpleResponse> getPresupuestosVencidos(Integer diasValidez);
+
+    /**
+     * Obtiene presupuestos vigentes
+     */
+    List<PresupuestoSimpleResponse> getPresupuestosVigentes();
+
+    /**
+     * Cuenta presupuestos por estado
+     */
+    Long countByEstado(String estado);
+
+    /**
+     * Calcula el total de presupuestos por estado en un período
+     */
+    java.math.BigDecimal calcularTotalPorEstadoYPeriodo(
+            String estado,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    );
+
+    /**
+     * Obtiene estadísticas de presupuestos en un período
+     */
+    EstadisticasPresupuestoResponse getEstadisticas(LocalDate fechaInicio, LocalDate fechaFin);
 
     // ========== Utilidades ==========
 
@@ -177,7 +162,17 @@ public interface PresupuestoService {
     boolean existsByNroPresupuesto(String nroPresupuesto);
 
     /**
-     * Genera un número de presupuesto único
+     * Obtiene presupuestos del día
+     */
+    List<PresupuestoSimpleResponse> getPresupuestosDelDia();
+
+    /**
+     * Obtiene presupuestos del mes
+     */
+    List<PresupuestoSimpleResponse> getPresupuestosDelMes();
+
+    /**
+     * Genera el siguiente número de presupuesto
      */
     String generarNroPresupuesto();
 }
